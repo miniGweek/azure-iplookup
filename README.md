@@ -8,7 +8,7 @@ Lookup a given ip against Azure IP / Servicetag json file to find out if it's a 
 # Setup and PreRequisites
  - Requires [.net core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1) runtime installed.
  - (Optional - Code supports downloading it now) Download the latest servicet tag json from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-us/download/details.aspx?id=56519)
--  (Optional - Code supports downloading it now)Copy it to this applications directory and rename it as ServiceTags_Public_Active.json
+-  (Optional - Code supports downloading it now) Copy it to this applications directory and rename it as ServiceTags_Public_Active.json
 
 
 # Instruction on how to use
