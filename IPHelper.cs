@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 
@@ -5,22 +6,46 @@ namespace azure_iplookup
 {
     internal class IPHelper
     {
-        public static string ReturnMatchedIPRange(string ip, List<Value> azureIps)
+        public static Dictionary<string, string> ReturnMatchedIPRange(List<string> ips, List<Value> azureIps)
         {
-            IPAddress incomingIp = IPAddress.Parse(ip);
-            foreach (var azureip in azureIps)
+            Dictionary<string, string> matchedIps = new Dictionary<string, string>();
+            foreach (var ip in ips)
             {
-                foreach (var subnet in azureip.properties.addressPrefixes)
+                bool ipFound = false;
+                IPAddress incomingIp = IsValidIP(ip) ? IPAddress.Parse(ip) : null;
+                if (incomingIp != null)
                 {
-                    IPNetwork network = IPNetwork.Parse(subnet);
-
-                    if (IPNetwork.Contains(network, incomingIp))
+                    foreach (var azureip in azureIps)
                     {
-                        return $"{subnet} - {azureip.name}";
+                        foreach (var subnet in azureip.properties.addressPrefixes)
+                        {
+                            IPNetwork network = IPNetwork.Parse(subnet);
+
+                            if (IPNetwork.Contains(network, incomingIp) && !ipFound)
+                            {
+                                matchedIps.Add(ip, $"{subnet} - {azureip.name}");
+                                ipFound = true;
+                                break;
+                            }
+                        }
                     }
                 }
+                else
+                {
+                    matchedIps.Add(ip,"Invalid IP Address");
+                }
+                
             }
-            return null;
+
+
+            return matchedIps;
+        }
+
+        public static Boolean IsValidIP(string ip)
+        {
+            IPAddress checkIp;
+            bool result = IPAddress.TryParse(ip, out checkIp);
+            return result;
         }
     }
 }
