@@ -49,8 +49,8 @@ Previous ServiceTags_Public_Active.json renamed to ServiceTags_Public_Arhive_110
 Newly downloaded file ServiceTags_Public_20210308.json renamed to ServiceTags_Public_Active.json
 ```
 
-### Example 5 : Read IPs from a txt file and then do lookup against the json
-```Powershell
+### Example 5 : Read IPs from a txt file and then do lookup against the json #1
+```Powershellcd 
 ❯ cat .\ListOfIPs.txt
 20.190.167.64
 20.190.167.65
@@ -67,6 +67,19 @@ Enter IP or the path to the file with list of IPs for searching in Azure IP/Serv
 ListOfIPs.txt
 Enter name of the json file ( if not specified ,ServiceTags_Public_Active.json will be used ) :
 
+IP : 20.190.167.64, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+IP : 20.190.167.65, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+IP : 20.190.167.19, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+IP : 20.190.167.22, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+IP : 20.190.167.86, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+IP : 13.70.72.238, Matched IP Range is 13.70.72.232/29 - AzureMonitor
+IP : somejunk, Matched IP Range is Invalid IP Address
+IP : 52.241.88.36, Matched IP Range is 52.241.88.32/28 - Storage
+```
+
+### Example 6 : Read IPs from a txt file and then do lookup against the json #2
+```Powershell
+❯ dotnet run ListOfIPs.txt
 IP : 20.190.167.64, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
 IP : 20.190.167.65, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
 IP : 20.190.167.19, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory

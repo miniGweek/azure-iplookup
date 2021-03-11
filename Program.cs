@@ -67,6 +67,10 @@ namespace azure_iplookup
                     {
                         ips = new List<string>() { ip };
                     }
+                    else if (File.Exists(ip))
+                    {
+                        ips = File.ReadAllLines(ip).ToList();
+                    }
                     else
                     {
                         Console.WriteLine("Invalid IP/File doesn't exist. Stopping.");
