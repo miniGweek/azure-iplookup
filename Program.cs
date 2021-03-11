@@ -14,85 +14,40 @@ namespace azure_iplookup
         {
             string ip = string.Empty;
             List<string> ips = null;
-            string serviceTagJsonFileName = "ServiceTags_Public_Active.json";
+            string serviceTagJsonFileName = string.Empty;
+            string defaultSeriveTagJsonFileName = "ServiceTags_Public_Active.json";
             string ipFlePath = string.Empty;
-            if (args != null && args.Length == 1 && "--update".Equals(args[0], StringComparison.InvariantCultureIgnoreCase))
+            if (args != null && args.Length == 1 &&
+                "--update".Equals(args[0], StringComparison.InvariantCultureIgnoreCase))
             {
-                var downloadedServiceTagsJsonFileName = await DownloadJson.DownloadServiceTagJsonFile();
-                if (!string.IsNullOrWhiteSpace(downloadedServiceTagsJsonFileName))
-                {
-
-                    Console.WriteLine("Latest Service Tag Json file downloaded");
-                    var archiveJsonFileName = $"ServiceTags_Public_Arhive_{DateTime.Today.ToString("ddMMyyyy")}.json";
-                    File.Move("ServiceTags_Public_Active.json", archiveJsonFileName);
-                    Console.WriteLine($"Previous {serviceTagJsonFileName} renamed to {archiveJsonFileName}");
-                    File.Copy(downloadedServiceTagsJsonFileName, serviceTagJsonFileName);
-                    Console.WriteLine(
-                        $"Newly downloaded file {downloadedServiceTagsJsonFileName} renamed to {serviceTagJsonFileName}");
-                    return;
-                }
+                await DownloadJson.DownloadAndRenameServiceTagsAndIPJsonFile(defaultSeriveTagJsonFileName);
+                return;
             }
             else
             {
-
                 if (args == null || args.Length == 0)
                 {
-                    Console.WriteLine("Enter IP or the path to the file with list of IPs for searching in Azure IP/ServiceTag Ranges :");
+                    Console.WriteLine(
+                        "Enter IP or the path to the file with list of IPs for searching in Azure IP/ServiceTag Ranges :");
                     ip = Console.ReadLine();
-                    if (IPHelper.IsValidIP(ip))
-                    {
-                        ips = new List<string>() {ip};
-                    }
-                    if (!IPHelper.IsValidIP(ip) && File.Exists(ip))
-                    {
-                        ips = File.ReadAllLines(ip).ToList();
-                    }
-                    else if (!IPHelper.IsValidIP(ip) && !File.Exists(ip))
-                    {
-                        Console.WriteLine("Invalid IP/File doesn't exist. Stopping.");
-                        return;
-                    }
+                    ips = ValidateAndLoadIp(ip);
+
                     Console.WriteLine(
                         "Enter name of the json file ( if not specified ,ServiceTags_Public_Active.json will be used ) :");
                     string userInputJsonFileName = Console.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(userInputJsonFileName))
-                    {
-                        serviceTagJsonFileName = userInputJsonFileName;
-                    }
+                    serviceTagJsonFileName = ValidateAndLoadJsonFileName(userInputJsonFileName, defaultSeriveTagJsonFileName);
                 }
                 else if (args.Length == 1)
                 {
                     ip = args[0];
-                    if (IPHelper.IsValidIP(ip))
-                    {
-                        ips = new List<string>() { ip };
-                    }
-                    else if (File.Exists(ip))
-                    {
-                        ips = File.ReadAllLines(ip).ToList();
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid IP/File doesn't exist. Stopping.");
-                        return;
-                    }
+                    ips = ValidateAndLoadIp(ip);
+                    serviceTagJsonFileName = defaultSeriveTagJsonFileName;
                 }
                 else if (args.Length == 2)
                 {
                     ip = args[0];
-                    if (IPHelper.IsValidIP(ip))
-                    {
-                        ips = new List<string>() { ip };
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid IP/File doesn't exist. Stopping.");
-                        return;
-                    }
-                    if (!string.IsNullOrWhiteSpace(args[1]))
-                    {
-                        serviceTagJsonFileName = args[1];
-                    }
+                    ips = ValidateAndLoadIp(ip);
+                    serviceTagJsonFileName = ValidateAndLoadJsonFileName(args[1], defaultSeriveTagJsonFileName);
                 }
 
                 var azureIpAndServiceTagJson = File.ReadAllText(serviceTagJsonFileName);
@@ -102,8 +57,44 @@ namespace azure_iplookup
                 {
                     Console.WriteLine($"IP : {m}, Matched IP Range is {match[m]}");
                 }
-                
+
             }
+        }
+
+        internal static string ValidateAndLoadJsonFileName(string userInputJsonFileName, string defaultSeriveTagJsonFileName)
+        {
+            string serviceTagJsonFileName = string.Empty;
+            if (!string.IsNullOrWhiteSpace(userInputJsonFileName))
+            {
+                serviceTagJsonFileName = userInputJsonFileName;
+            }
+            else
+            {
+                serviceTagJsonFileName = defaultSeriveTagJsonFileName;
+            }
+
+            return serviceTagJsonFileName;
+        }
+
+        internal static List<string> ValidateAndLoadIp(string ip)
+        {
+            List<string> ips = null;
+            if (IPHelper.IsValidIP(ip))
+            {
+                ips = new List<string>() { ip };
+            }
+
+            if (!IPHelper.IsValidIP(ip) && File.Exists(ip))
+            {
+                ips = File.ReadAllLines(ip).ToList();
+            }
+            else if (!IPHelper.IsValidIP(ip) && !File.Exists(ip))
+            {
+                Console.WriteLine("Invalid IP/File doesn't exist. Stopping.");
+                return ips;
+            }
+
+            return ips;
         }
     }
 }

@@ -28,12 +28,38 @@ namespace azure_iplookup
                 Console.WriteLine("Latest file already exists. Skipping download.");
                 return string.Empty;
             }
-            else
+
+            WebClient client = new WebClient();
+            client.DownloadFile(serviceTagsJsonFileUrl, serviceTagsJsonFileName);
+            return serviceTagsJsonFileName;
+
+        }
+
+        internal static async Task<string> DownloadAndRenameServiceTagsAndIPJsonFile(string serviceTagJsonFileName)
+        {
+            var downloadedServiceTagsJsonFileName = await DownloadServiceTagJsonFile();
+            if (!string.IsNullOrWhiteSpace(downloadedServiceTagsJsonFileName))
             {
-                WebClient client = new WebClient();
-                client.DownloadFile(serviceTagsJsonFileUrl, serviceTagsJsonFileName);
-                return serviceTagsJsonFileName;
+                Console.WriteLine("Latest Service Tag Json file downloaded");
+                var archiveJsonFileName = $"ServiceTags_Public_Arhive_{DateTime.Today.ToString("ddMMyyyy")}.json";
+                if (File.Exists(serviceTagJsonFileName))
+                {
+                    File.Move(serviceTagJsonFileName, archiveJsonFileName);
+                    Console.WriteLine($"Previous {serviceTagJsonFileName} renamed to {archiveJsonFileName}");
+                }
+
+                if (!File.Exists(serviceTagJsonFileName))
+                {
+                    File.Copy(downloadedServiceTagsJsonFileName, serviceTagJsonFileName);
+                    Console.WriteLine(
+                        $"Newly downloaded file {downloadedServiceTagsJsonFileName} renamed to {serviceTagJsonFileName}");
+                }
+
+
+                return downloadedServiceTagsJsonFileName;
             }
+
+            return downloadedServiceTagsJsonFileName;
         }
     }
 }
