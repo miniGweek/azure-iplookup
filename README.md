@@ -1,5 +1,6 @@
 # azure-iplookup
-Lookup a given ip against Azure IP / Servicetag json file to find out if it's a valid Azure IP and find which service it belongs to
+Lookup a given ip against Azure IP / Servicetag json file to find out if it's a valid Azure IP and find which service it belongs to.
+Also supports lookup against your own custom cidr ranges.
 
 # Credits
 - Using [AngleSharp](https://github.com/AngleSharp/AngleSharp) library for parsing html and fetching download link of the json file.
@@ -7,8 +8,9 @@ Lookup a given ip against Azure IP / Servicetag json file to find out if it's a 
 
 # Setup and PreRequisites
  - Requires [.net core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1) runtime installed.
- - (Optional - Code supports downloading it now) Download the latest servicet tag json from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-us/download/details.aspx?id=56519)
--  (Optional - Code supports downloading it now) Copy it to this applications directory and rename it as ServiceTags_Public_Active.json
+ - (Optional - Supports downloading it now) Download the latest servicet tag json from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-us/download/details.aspx?id=56519)
+-  (Optional - Supports downloading it now) Copy it to this applications directory and rename it as ServiceTags_Public_Active.json
+-  (Optional) - Supports dowing lookup against your custom CIDR Range files.
 
 
 # Instruction on how to use
@@ -16,22 +18,25 @@ Lookup a given ip against Azure IP / Servicetag json file to find out if it's a 
 - Run `dotnet run --update` to download the latest servicetags json file.
 - Run `dotnet run` for prompts
 - Run `dotnet run IP` to do a lookup of an IP against the servicetags json file downloaded.
-- Run `dotnet run IP filename` to do a lookup of an IP against the servicetags json file mentioned in the filename.
-- Run `dotnet run FileWithIpList` to do a lookup of an List Of IPS from a txt file against the json file in the app dir.
+- Run `dotnet run IP Filename` to do a lookup of an IP against the servicetags json file mentioned in the filename.
+- Run `dotnet run FileWithIpList` to do a lookup of a List Of IPs from a txt file against the json file in the app dir.
+- Run `dotnet run FileWithIpList FileWithCIDRList` to do a lookup of a List of IPs from a txt file against either the Azure ServiceTag json file or your own custom CIDR list file.
 
 ### Example 1 : 
 ``` Powershell
-dotnet run
+❯ dotnet run
 Enter IP or the path to the file with list of IPs for searching in Azure IP/ServiceTag Ranges :
 20.190.167.64
 Enter name of the json file ( if not specified ,ServiceTags_Public_Active.json will be used ) :
 
-IP : 20.190.167.64, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
+------IP--------|----Matched----
+ 20.190.167.64  , 20.190.128.0/18 - AzureActiveDirectory
 ```
 ### Example 2 : 
 ``` Powershell
-dotnet run 20.193.17.157
-IP : 20.193.17.157, Matched IP Range is 20.193.0.0/18 - AzureCloud.australiaeast
+❯ dotnet run 20.193.17.157
+------IP--------|----Matched----
+ 20.193.17.157  , 20.193.0.0/18 - AzureCloud.australiaeast
 ```
 ### Example 3 : Specify a **json** file
 
@@ -48,44 +53,60 @@ Latest Service Tag Json file downloaded
 Previous ServiceTags_Public_Active.json renamed to ServiceTags_Public_Arhive_11032021.json
 Newly downloaded file ServiceTags_Public_20210308.json renamed to ServiceTags_Public_Active.json
 ```
-
-### Example 5 : Read IPs from a txt file and then do lookup against the json #1
-```Powershellcd 
-❯ cat .\ListOfIPs.txt
-20.190.167.64
-20.190.167.65
-10.20.10.3
-20.190.167.19
-20.190.167.22
-20.190.167.86
-13.70.72.238
-somejunk
-52.241.88.36
-
+- When a latest json file does not exist in your local:
+``` Powershell
+dotnet run --update
+Latest Service Tag Json file downloaded
+Newly downloaded file ServiceTags_Public_20210315.json renamed to ServiceTags_Public_Active.json
+```
+### Example 5 : Read IPs from a txt file and then do lookup against your own CIDR file list #1
+```Powershell
 ❯ dotnet run
 Enter IP or the path to the file with list of IPs for searching in Azure IP/ServiceTag Ranges :
-ListOfIPs.txt
+ListOfIps.txt
 Enter name of the json file ( if not specified ,ServiceTags_Public_Active.json will be used ) :
 
-IP : 20.190.167.64, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.65, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.19, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.22, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.86, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 13.70.72.238, Matched IP Range is 13.70.72.232/29 - AzureMonitor
-IP : somejunk, Matched IP Range is Invalid IP Address
-IP : 52.241.88.36, Matched IP Range is 52.241.88.32/28 - Storage
+------IP--------|----Matched----
+ 20.190.167.64  , 20.190.128.0/18 - AzureActiveDirectory
+ 20.190.167.65  , 20.190.128.0/18 - AzureActiveDirectory
+ 10.20.10.3     , No Match
 ```
 
 ### Example 6 : Read IPs from a txt file and then do lookup against the json #2
 ```Powershell
 ❯ dotnet run ListOfIPs.txt
-IP : 20.190.167.64, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.65, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.19, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.22, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 20.190.167.86, Matched IP Range is 20.190.128.0/18 - AzureActiveDirectory
-IP : 13.70.72.238, Matched IP Range is 13.70.72.232/29 - AzureMonitor
-IP : somejunk, Matched IP Range is Invalid IP Address
-IP : 52.241.88.36, Matched IP Range is 52.241.88.32/28 - Storage
+------IP--------|----Matched----
+ 20.190.167.64  , 20.190.128.0/18 - AzureActiveDirectory
+ 20.190.167.65  , 20.190.128.0/18 - AzureActiveDirectory
+ 10.20.10.3     , No Match
+
+❯ dotnet run ListOfOnPremIPs.txt OnPremCIDR.txt
+------IP--------|----Matched----
+ 10.9.221.38    , No Match
+```
+
+### Example 7: Read IPs from a txt file and then do lookup against either servicetag json file or your own custom cidr list file.
+```Powershell
+❯ dotnet run ListOfOnPremIPs.txt OnPremCIDR.txt
+------IP--------|----Matched----
+ 10.9.221.38    , No Match
+ 10.8.243.127   , No Match
+ 10.5.227.253   , 10.5.2.1/16 - Default_Autogenerated
+ 10.6.94.174    , No Match
+ 10.8.252.159   , No Match
+ 10.5.93.140    , 10.5.2.1/16 - Default_Autogenerated
+ 10.6.63.131    , No Match
+ 10.7.232.85    , No Match
+ 10.7.232.220   , No Match
+ 10.8.221.139   , No Match
+ 10.8.14.71     , No Match
+ 10.7.88.170    , No Match
+ 10.7.119.97    , No Match
+ 10.7.207.96    , No Match
+ 10.9.168.60    , No Match
+ 10.6.65.24     , No Match
+ 10.5.175.247   , 10.5.2.1/16 - Default_Autogenerated
+ 10.6.90.149    , No Match
+ 10.7.133.232   , No Match
+ 10.7.192.145   , No Match
 ```
