@@ -14,7 +14,7 @@ namespace azure_iplookup
                 bool ipFound = false;
                 IPNetwork incomingNetwork = null;
                 IPAddress incomingIp = IsValidIP(ip) ? IPAddress.Parse(ip) : null;
-                incomingNetwork = incomingIp == null ? IPNetwork.Parse(ip) : null;
+                bool incomingNetworkParsed = incomingIp == null ? IPNetwork.TryParse(ip, out incomingNetwork) : false;
                 if (incomingIp != null || incomingNetwork!=null)
                 {
                     foreach (var azureip in azureIps)
@@ -24,8 +24,8 @@ namespace azure_iplookup
                             IPNetwork network = IPNetwork.Parse(subnet);
                             
 
-                            if ((incomingIp!=null && network.Contains(incomingIp)) 
-                                || (incomingNetwork!=null &&incomingNetwork.Contains(incomingNetwork)) 
+                            if (((incomingIp!=null && network.Contains(incomingIp)) 
+                                || (incomingNetwork!=null &&incomingNetwork.Contains(incomingNetwork)))
                                 && !ipFound)
                             {
                                 matchedIps.Add(ip, $"{subnet} - {azureip.name}");
@@ -38,12 +38,18 @@ namespace azure_iplookup
 
                     if (!ipFound)
                     {
-                        matchedIps.Add(ip, "No Match");
+                        if (!matchedIps.ContainsKey(ip))
+                        {
+                            matchedIps.Add(ip, "No Match");
+                        }
                     }
                 }
                 else
                 {
-                    matchedIps.Add(ip,"No Match");
+                    if (!matchedIps.ContainsKey(ip))
+                    {
+                        matchedIps.Add(ip, "No Match");
+                    }
                 }
                 
             }

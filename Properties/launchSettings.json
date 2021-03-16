@@ -1,8 +1,7 @@
 {
   "profiles": {
     "azure-iplookup": {
-      "commandName": "Project",
-      "commandLineArgs": "ListOfIps.txt OnPremCIDR.txt"
+      "commandName": "Project"
     }
   }
 }
