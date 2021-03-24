@@ -25,7 +25,7 @@ namespace azure_iplookup
                             
 
                             if (((incomingIp!=null && network.Contains(incomingIp)) 
-                                || (incomingNetwork!=null &&incomingNetwork.Contains(incomingNetwork)))
+                                || (incomingNetwork!=null && network.Contains(incomingNetwork)))
                                 && !ipFound)
                             {
                                 matchedIps.Add(ip, $"{subnet} - {azureip.name}");
